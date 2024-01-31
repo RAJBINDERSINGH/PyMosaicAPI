@@ -39,3 +39,41 @@ def read_data(filename: str):
     file_path = f"{data_folder}{filename}"
     data = read_json_file(file_path)
     return {"filename": filename, "data": data}
+
+
+from fastapi import FastAPI, HTTPException, Depends
+from pydantic import BaseModel
+from typing import Optional
+import bcrypt
+
+app = FastAPI()
+
+# Dummy database (in-memory)
+fake_db = {}
+
+# User model
+class User(BaseModel):
+    username: str
+    password: str
+
+# Utility function for hashing passwords
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+# Utility function to verify password
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+
+@app.post("/register/")
+def register_user(user: User):
+    # Check if user already exists
+    if user.username in fake_db:
+        raise HTTPException(status_code=400, detail="Username already registered")
+
+    # Hash user's password before storing it
+    hashed_password = hash_password(user.password)
+    fake_db[user.username] = hashed_password
+
+    return {"username": user.username, "message": "User registered successfully"}
+
+# You can add more endpoints here for login, user profile, etc.
