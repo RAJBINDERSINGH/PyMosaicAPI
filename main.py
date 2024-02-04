@@ -75,5 +75,5 @@ def register_user(user: User):
     fake_db[user.username] = hashed_password
 
     return {"username": user.username, "message": "User registered successfully"}
-
+#write the code here
 # You can add more endpoints here for login, user profile, etc.
